@@ -34,7 +34,9 @@ app.UseXfo(conf => conf.SameOrigin());
 //           al no degradar para evitarlos solo cuando se pasa de https a http
 app.UseReferrerPolicy(conf => conf.NoReferrer());
 
-// USECSP: ocupa dos tipos de recursos 
+// USECSP: ocupa dos tipos de recursos usa nuestra aplicacion y donde se encuentra
+// por ejemplo -> los estilos y las secuencias de comandos solo se pueden cargar desde el mismo dominio
+//                y tambien permitimos que se ejecute js en linea
 app.UseCsp(conf =>
                 conf.DefaultSources(s => s.Self())
                     .StyleSources(s => s.Self().UnsafeInline())
