@@ -1,9 +1,27 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using SecurityCodeInCSharp.Data;
+using SecurityCodeInCSharp.Areas.Identity.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("SecurityCodeInCSharpContextConnection") ?? throw new InvalidOperationException("Connection string 'SecurityCodeInCSharpContextConnection' not found.");
+
+builder.Services.AddDbContext<SecurityCodeInCSharpContext>(options => options.UseSqlServer(connectionString));
+
+builder.Services.AddDefaultIdentity<SecurityCodeInCSharpUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SecurityCodeInCSharpContext>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+//valida automaticamente los tokens antiforgery en cualquier formulario dentro de nuestro site
+builder.Services.AddControllersWithViews(conf =>
+{
+    conf.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
