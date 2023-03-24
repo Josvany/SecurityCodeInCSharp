@@ -26,6 +26,9 @@ namespace SecurityCodeInCSharp.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
+            //limpiar la session cuando cerraramos la session el el sitio
+            HttpContext.Session.Clear();
+
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
             if (returnUrl != null)
