@@ -9,7 +9,28 @@ var connectionString = builder.Configuration.GetConnectionString("SecurityCodeIn
 
 builder.Services.AddDbContext<SecurityCodeInCSharpContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<SecurityCodeInCSharpUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SecurityCodeInCSharpContext>();
+builder.Services.AddDefaultIdentity<SecurityCodeInCSharpUser>(options =>
+                                                               {
+                                                                   options.User.RequireUniqueEmail = true; // requerir emailUnico
+                                                                   options.User.AllowedUserNameCharacters = "abcdfghijklmnopqrstvwxyz123456789@-."; // caracteres que se pueden utilizar
+                                                                                                                                      
+                                                                   options.SignIn.RequireConfirmedAccount = true; // requiere confirmacion de cuenta
+                                                                   options.SignIn.RequireConfirmedEmail = true; // requiere confirmacion de email
+                                                                   options.SignIn.RequireConfirmedPhoneNumber = false; // no requiere confirmacion por numero de telefono
+
+                                                                   options.Password.RequiredLength = 12; // minimo de caracteres en la contraseña
+                                                                   options.Password.RequireLowercase = true; // requiere caracteres en minusculas
+                                                                   options.Password.RequireUppercase = true; // requiere caracteres en mayusculas
+                                                                   options.Password.RequireDigit = true; // requiere de numeros
+                                                                   options.Password.RequireNonAlphanumeric = true; // no requiere caracteres alfanumericos
+                                                                   options.Password.RequiredUniqueChars = 10; // cantidad de caracteres unicos requeridos
+
+                                                                   //opciones de bloqueo
+                                                                   options.Lockout.AllowedForNewUsers = true; // permitido para nuevos usuarios
+                                                                   options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // bloquear 5 minutos cuando fallan la cantidad de intentos por autenticarse
+                                                                   options.Lockout.MaxFailedAccessAttempts = 5; // bloquear usuario despues de 5 intentos por authenticarse
+                                                               }
+                                                              ).AddEntityFrameworkStores<SecurityCodeInCSharpContext>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
