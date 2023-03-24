@@ -13,7 +13,7 @@ builder.Services.AddDefaultIdentity<SecurityCodeInCSharpUser>(options =>
                                                                {
                                                                    options.User.RequireUniqueEmail = true; // requerir emailUnico
                                                                    options.User.AllowedUserNameCharacters = "abcdfghijklmnopqrstvwxyz123456789@-."; // caracteres que se pueden utilizar
-                                                                                                                                      
+
                                                                    options.SignIn.RequireConfirmedAccount = true; // requiere confirmacion de cuenta
                                                                    options.SignIn.RequireConfirmedEmail = true; // requiere confirmacion de email
                                                                    options.SignIn.RequireConfirmedPhoneNumber = false; // no requiere confirmacion por numero de telefono
@@ -27,7 +27,7 @@ builder.Services.AddDefaultIdentity<SecurityCodeInCSharpUser>(options =>
 
                                                                    //opciones de bloqueo
                                                                    options.Lockout.AllowedForNewUsers = true; // permitido para nuevos usuarios
-                                                                   options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // bloquear 5 minutos cuando fallan la cantidad de intentos por autenticarse
+                                                                   options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromHours(1); // bloquear 5 minutos cuando fallan la cantidad de intentos por autenticarse
                                                                    options.Lockout.MaxFailedAccessAttempts = 5; // bloquear usuario despues de 5 intentos por authenticarse
                                                                }
                                                               ).AddEntityFrameworkStores<SecurityCodeInCSharpContext>();
@@ -41,8 +41,17 @@ builder.Services.AddControllersWithViews(conf =>
     conf.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 
-var app = builder.Build();
+//distribucion de la cache
+builder.Services.AddDistributedMemoryCache();
 
+builder.Services.AddSession(options =>
+{
+    options.IOTimeout = TimeSpan.FromMinutes(20);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -51,6 +60,11 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     //app.UseHsts();
 }
+
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    Secure = CookieSecurePolicy.Always
+});
 
 // las mejores practicas dicta que el valor debe ser 120 dias maximo 365
 // al incluir  los subdominios indica que solo se puede acceder al site mediante https
